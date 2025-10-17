@@ -29,12 +29,15 @@
 
 - Que el alumno se familiarice con el uso de herramientas de procesamiento de datos como `numpy`, `scipy`, `pandas` y `scikit-learn`.
 - Que el alumno entienda el concepto de regresión lineal mediante el desarrollo de modelos con herramientas de software.
+- Que el alumno entienda el concepto de regresión lineal múltiple mediante el desarrollo de modelos con herramientas de software.
+- Que el alumno entienda el concepto de regresión polinomial y no lineal mediante el desarrollo de modelos con herramientas de software.
+- Que el alumno entienda el concepto de regresión logística mediante el desarrollo de modelos con herramientas de software.
 - Que el alumno ejecute el paso de separación de datos para el entrenamiento de modelos de aprendizaje automático.
 
 ## Pasos
 
 1. Resuelve todos los `TODO` en los archivos de python dentro del paquete `introduction`.
-2. Resuelve todos los `TODO` en los archivos de python dentro del paquete `linear_regression`.
+2. Resuelve todos los `TODO` en los archivos de python dentro del paquete `regression_models`.
 3. Completa las pruebas unitarias exitosamente.
 4. Haz **commit** y entrega en el branch `develop` de tu Fork de GitHub.
 

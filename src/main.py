@@ -8,7 +8,7 @@
 # Descripción: Script principal del proyecto
 # ============================================================
 import introduction as intro
-import linear_regression as lr
+import regression_models as rm
 import numpy as np
 import matplotlib.pyplot as plt
 import sys, os
@@ -140,7 +140,7 @@ def linear_regression():
             os.mkdir(OUTPUT)
         
         # Comparación de modelos de regresión lineal
-        lr.LinearRegressionCompare(url=SOURCE_URL, hist=HISTOGRAM, base=BASE, f1=FEATURE_1, f2=FEATURE_2, out=OUTPUT)
+        rm.LinearRegressionCompare(url=SOURCE_URL, hist=HISTOGRAM, base=BASE, f1=FEATURE_1, f2=FEATURE_2, out=OUTPUT)
         print(f"Comparación de modelos: [{FEATURE_1} {FEATURE_2}] con {BASE} completada.\n")
     except Exception as e:
         # Status: Error de software
@@ -149,8 +149,60 @@ def linear_regression():
         
     # Return de la función: status EX_OK (0) | EX_SOFTWARE (70)
     return status  
+
+def multiple_linear_regression():
+    # Status: OK
+    status = os.EX_OK
     
-def main(): 
+    # Definición de parámetros para comparación de modelos de regresión lineal
+    OUTPUT = os.path.join(os.path.dirname(__file__), "output")
+    CORRELATION = os.path.join(OUTPUT, "correlation.png")
+    BASE = "CO2EMISSIONS"
+    FEATURE_1 = "ENGINESIZE"
+    FEATURE_2 = "FUELCONSUMPTION_COMB"
+    
+    try:
+        # Creación de directorio
+        if not os.path.exists(OUTPUT):
+            os.mkdir(OUTPUT)
+        
+        # Comparación de modelos de regresión lineal
+        rm.MultipleLinearRegressionCompare(url=SOURCE_URL, corr=CORRELATION, base=BASE, f1=FEATURE_1, f2=FEATURE_2, out=OUTPUT)
+        print(f"Correlación: [{FEATURE_1} {FEATURE_2}] con {BASE} completada.\n")
+    except Exception as e:
+        # Status: Error de software
+        status = os.EX_SOFTWARE
+        print(f"Error inesperado: {e}\n")
+        
+    # Return de la función: status EX_OK (0) | EX_SOFTWARE (70)
+    return status  
+
+def logistic_regression():
+    # Status: OK
+    status = os.EX_OK
+    
+    # Definición de parámetros para comparación de modelos de regresión logistica
+    CHURN_URL = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-ML0101EN-SkillsNetwork/labs/Module%203/data/ChurnData.csv"
+    OUTPUT = os.path.join(os.path.dirname(__file__), "output")
+    BASE = "churn"
+        
+    try:
+        # Creación de directorio
+        if not os.path.exists(OUTPUT):
+            os.mkdir(OUTPUT)
+        
+        # Comparación de modelos de regresión lineal
+        rm.LogisticRegressionCompare(url=CHURN_URL, base=BASE, out=OUTPUT)
+        print(f"Coeficientes: '{BASE}' completada.\n")
+    except Exception as e:
+        # Status: Error de software
+        status = os.EX_SOFTWARE
+        print(f"Error inesperado: {e}\n")
+        
+    # Return de la función: status EX_OK (0) | EX_SOFTWARE (70)
+    return status  
+
+def main():
     
     # Status: OK
     status = os.EX_OK
@@ -164,6 +216,16 @@ def main():
     print(f"EJERCICIO 2")
     print(SEPARATOR)
     status = linear_regression()
+    
+    # Evaluación de tercer ejercicio
+    print(f"EJERCICIO 3")
+    print(SEPARATOR)
+    status = multiple_linear_regression()
+    
+    # Evaluación de cuarto ejercicio
+    print(f"EJERCICIO 4")
+    print(SEPARATOR)
+    status = logistic_regression()
     
     # Return de la función: status EX_OK (0) | EX_SOFTWARE (70)
     return status  

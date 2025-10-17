@@ -16,7 +16,9 @@ import main
 import introduction.intro_numpy as inp
 import introduction.intro_pandas as ipd
 import introduction.intro_scipy as isp
-from linear_regression.linear_regression import LinearRegressionCompare
+from regression_models.linear_regression import LinearRegressionCompare
+from regression_models.multiple_linear_regression import MultipleLinearRegressionCompare
+from regression_models.logistic_regression import LogisticRegressionCompare
 
 # Colores ANSI
 GREEN = "\033[92m"
@@ -31,7 +33,9 @@ OUTPUT_DIR = "test_outputs"
 FEATURE_1 = "ENGINESIZE"
 FEATURE_2 = "FUELCONSUMPTION_COMB"
 BASE = "CO2EMISSIONS"
+CHURN = "churn"
 HISTOGRAM = os.path.join(OUTPUT_DIR, "histogram.png")
+CORRELATION = os.path.join(OUTPUT_DIR, "correlation.png")
 
 class CustomTestResult(unittest.TextTestResult):
     def __init__(self, *args, **kwargs):
@@ -227,6 +231,90 @@ class TestEvaluationTwo(unittest.TestCase):
         for arr in d1:
             self.assertIsInstance(arr, np.ndarray)
 
+class TestEvaluationThree(unittest.TestCase):
+
+    # ===================== linear_regression =====================
+
+    @classmethod
+    def setUpClass(cls):
+        if not os.path.exists(OUTPUT_DIR):
+            os.mkdir(OUTPUT_DIR)
+        cls.model = MultipleLinearRegressionCompare(
+            url=SOURCE_URL,
+            corr=CORRELATION,
+            f1=FEATURE_1,
+            f2=FEATURE_2,
+            base=BASE,
+            out=OUTPUT_DIR
+        )
+
+    def test_attributes_exist(self):
+        self.assertIsInstance(self.model.x, np.ndarray)
+        self.assertIsInstance(self.model.y, np.ndarray)
+        self.assertIsNotNone(self.model.m)
+        self.assertIsNotNone(self.model.d)
+        self.assertIsNotNone(self.model.std_scaler) 
+        self.assertIsNotNone(self.model.x_std)
+
+    def test_model_training(self):
+        coef = self.model.m.coef_[0]
+        self.assertIsInstance(coef, float)
+
+    def test_output_files_created(self):
+        files = [
+            f"multiple_linear_regression_{FEATURE_1.lower()}_{FEATURE_2.lower()}_{BASE.lower()}.png",
+            f"split_mlr_{FEATURE_1.lower()}_{BASE.lower()}.png",
+            f"split_mlr_{FEATURE_2.lower()}_{BASE.lower()}.png",
+            "correlation.png"
+        ]
+        for f in files:
+            self.assertTrue(os.path.exists(os.path.join(OUTPUT_DIR, f)))
+
+    def test_prepare_data_output_shape(self):
+        d = self.model.prepare_data(self.model.x, self.model.y, prc=0.2, random_state=42)
+        self.assertEqual(len(d), 4)
+        for arr in d:
+            self.assertIsInstance(arr, np.ndarray)
+
+class TestEvaluationFour(unittest.TestCase):
+
+    # ===================== linear_regression =====================
+
+    @classmethod
+    def setUpClass(cls):
+        if not os.path.exists(OUTPUT_DIR):
+            os.mkdir(OUTPUT_DIR)
+        cls.model = LogisticRegressionCompare(
+            url=SOURCE_URL,
+            base=CHURN,
+            out=OUTPUT_DIR
+        )
+
+    def test_attributes_exist(self):
+        self.assertIsInstance(self.model.x, np.ndarray)
+        self.assertIsInstance(self.model.y, np.ndarray)
+        self.assertIsNotNone(self.model.m)
+        self.assertIsNotNone(self.model.d)
+        self.assertIsNotNone(self.model.std_scaler) 
+        self.assertIsNotNone(self.model.x_std)
+
+    def test_model_training(self):
+        coef = self.model.m.coef_[0]
+        self.assertIsInstance(coef, float)
+
+    def test_output_files_created(self):
+        files = [
+            f"logistic_regression_churn_coefficients.png"
+        ]
+        for f in files:
+            self.assertTrue(os.path.exists(os.path.join(OUTPUT_DIR, f)))
+
+    def test_prepare_data_output_shape(self):
+        d = self.model.prepare_data(self.model.x, self.model.y, prc=0.2, random_state=4)
+        self.assertEqual(len(d), 4)
+        for arr in d:
+            self.assertIsInstance(arr, np.ndarray)
+
 if __name__ == '__main__':
     
     # ===================== ejercicio 1 =====================
@@ -291,4 +379,66 @@ if __name__ == '__main__':
         print(f"{RED}{BOLD}FAILED:{RESET} Uno o más tests fallaron.")
     print(SEPARATOR)
 
-    sys.exit(not result1.wasSuccessful() and not result2.wasSuccessful() )
+    # ===================== ejercicio 3 =====================
+
+    suite3 = unittest.defaultTestLoader.loadTestsFromTestCase(TestEvaluationThree)
+    silent_stream3 = io.StringIO()
+    runner3 = CustomTestRunner(stream=silent_stream3, verbosity=0)
+    result3 = runner3.run(suite3)
+
+    print(f"{BOLD}EVALUACION 3{RESET}")
+    # Resultados individuales
+    print(SEPARATOR)
+    print(f"{BOLD}Resultados individuales:{RESET}")
+    for test_case in result3.successes:
+        print(f"{test_case._testMethodName}: {GREEN}{BOLD}PASSED{RESET}")
+
+    for test_case, traceback in result3.failures + result3.errors:
+        name = getattr(test_case, "_testMethodName", str(test_case))
+        print(f"{name}: {RED}{BOLD}FAILED{RESET}")
+        # Extraer solo el mensaje de la última línea del traceback
+        last_line = traceback.strip().split('\n')[-1]
+        mensaje = last_line.split(':')[-1].strip()
+        print(f"- detalles: {LIGHT_RED}{mensaje}{RESET}")
+
+    # Resumen final
+    print(SEPARATOR)
+    print(f"{BOLD}Resumen final:{RESET}")
+    if result3.wasSuccessful():
+        print(f"{GREEN}{BOLD}SUCCESS:{RESET} Todos los tests pasaron correctamente.")
+    else:
+        print(f"{RED}{BOLD}FAILED:{RESET} Uno o más tests fallaron.")
+    print(SEPARATOR)
+
+    # ===================== ejercicio 4 =====================
+
+    suite4 = unittest.defaultTestLoader.loadTestsFromTestCase(TestEvaluationFour)
+    silent_stream4 = io.StringIO()
+    runner4 = CustomTestRunner(stream=silent_stream4, verbosity=0)
+    result4 = runner4.run(suite4)
+
+    print(f"{BOLD}EVALUACION 4{RESET}")
+    # Resultados individuales
+    print(SEPARATOR)
+    print(f"{BOLD}Resultados individuales:{RESET}")
+    for test_case in result4.successes:
+        print(f"{test_case._testMethodName}: {GREEN}{BOLD}PASSED{RESET}")
+
+    for test_case, traceback in result4.failures + result4.errors:
+        name = getattr(test_case, "_testMethodName", str(test_case))
+        print(f"{name}: {RED}{BOLD}FAILED{RESET}")
+        # Extraer solo el mensaje de la última línea del traceback
+        last_line = traceback.strip().split('\n')[-1]
+        mensaje = last_line.split(':')[-1].strip()
+        print(f"- detalles: {LIGHT_RED}{mensaje}{RESET}")
+
+    # Resumen final
+    print(SEPARATOR)
+    print(f"{BOLD}Resumen final:{RESET}")
+    if result4.wasSuccessful():
+        print(f"{GREEN}{BOLD}SUCCESS:{RESET} Todos los tests pasaron correctamente.")
+    else:
+        print(f"{RED}{BOLD}FAILED:{RESET} Uno o más tests fallaron.")
+    print(SEPARATOR)
+    
+    sys.exit(not result1.wasSuccessful() and not result2.wasSuccessful() and not result3.wasSuccessful() and not result4.wasSuccessful())
