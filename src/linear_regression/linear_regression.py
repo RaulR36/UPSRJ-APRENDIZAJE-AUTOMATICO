@@ -44,8 +44,8 @@ class LinearRegressionCompare:
         self.m1 = self.create_model()
         self.m2 = self.create_model()
         # Entrenamiento de modelos
-        self.train_model(self.m1, self.d1[0])
-        self.train_model(self.m2, self.d2[0])
+        self.train_model(self.m1, self.d1)
+        self.train_model(self.m2, self.d2)
         # Coeficientes de regresor y la intercepción
         self.get_coef_and_int(self.m1)
         self.get_coef_and_int(self.m2)
@@ -61,11 +61,6 @@ class LinearRegressionCompare:
         self.plot_model(model=self.m2, x=self.x2, y=self.y, x_label=self.f2.capitalize(), y_label=self.base.capitalize(),
                         out=os.path.join(out, f"linear_regression_{self.f2.lower()}_{self.base.lower()}.png"))
         
-    # TODO: Define un método que prepare la información para ser analizada por regresión lineal.
-    #       Recuerda que al hacer un modelo de aprendizaje automático debemos dividir la información disponible en
-    #       datos de entrenamiento y datos de pruebas, por lo tanto, a la salida debe 
-    #       haber un tuple(x_train, x_test, y_train, y_test) de arreglos de numpy.
-    # NOTE: https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html
     def prepare_data(self, x:np.ndarray, y:np.ndarray, prc: float, random_state: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
         Divide los datos en conjuntos de entrenamiento y prueba.
@@ -79,11 +74,13 @@ class LinearRegressionCompare:
         Returns:
             tuple: (x_train, x_test, y_train, y_test)
         """
-        x_train, x_test, y_train, y_test = None, None, None, None
+        x_reshaped = x.reshape(-1, 1)
+        x_train, x_test, y_train, y_test = train_test_split(
+            x_reshaped, y, test_size=prc, random_state=random_state
+        )
+        
         return (x_train, x_test, y_train, y_test)
     
-    # TODO: Define un método que devuelva un objeto "linear_model.LinearRegression" de scikit-learn.
-    # NOTE: https://scikit-learn.org/stable/modules/linear_model.html
     def create_model(self) -> linear_model.LinearRegression:
         """
         Crea un modelo de regresión lineal.
@@ -91,13 +88,9 @@ class LinearRegressionCompare:
         Returns:
             LinearRegression: Modelo vacío listo para entrenar.
         """
-        return None
+        return linear_model.LinearRegression()
     
-    # TODO: Define un método que entrene un modelo de entrada "linear_model" de scikit-learn
-    #       con la información de entrada "data".
-    # NOTE: https://numpy.org/doc/stable/reference/generated/numpy.ndarray.reshape.html
-    #       https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression.fit
-    def train_model(self, model: linear_model.LinearRegression, data: np.ndarray) -> None:
+    def train_model(self, model: linear_model.LinearRegression, data: tuple) -> None:
         """
         Entrena el modelo con los datos de entrenamiento.
 
@@ -105,11 +98,12 @@ class LinearRegressionCompare:
             model (LinearRegression): Modelo a entrenar.
             data (tuple): (x_train, x_test, y_train, y_test)
         """
-        pass
+        x_train, x_test, y_train, y_test = data
+        model.fit(x_train, y_train)
+        
+        if len(model.coef_.shape) == 1:
+            model.coef_ = model.coef_.reshape(1, -1)
     
-    # TODO: Define un método que obtenga los coeficientes de regresor y la intercepción
-    #       de un modelo de entrada "linear_model" de scikit-learn.
-    # NOTE: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression
     def get_coef_and_int(self, model: linear_model.LinearRegression) -> None:
         """
         Imprime los coeficientes y la intercepción del modelo.
@@ -117,10 +111,9 @@ class LinearRegressionCompare:
         Args:
             model (LinearRegression): Modelo entrenado.
         """
-        pass
+        print(f"Coeficiente(s): {model.coef_}")
+        print(f"Intercepción: {model.intercept_}")
     
-    # TODO: Define un método que haga una predicción con el modelo y carácteristica de entrada.
-    # NOTE: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression.predict
     def predict(self, model: linear_model.LinearRegression, x: np.ndarray) -> np.ndarray:
         """
         Realiza predicciones con el modelo.
@@ -132,7 +125,8 @@ class LinearRegressionCompare:
         Returns:
             np.ndarray: Predicciones.
         """
-        prediction = None
+        x_reshaped = x.reshape(-1, 1)
+        prediction = model.predict(x_reshaped)
         return prediction
     
     def evaluate(self, y: np.ndarray, prediction: np.ndarray) -> None:
@@ -144,13 +138,21 @@ class LinearRegressionCompare:
         
     def plot_model(self, model: linear_model.LinearRegression, x: np.ndarray, y: np.ndarray, x_label: str, y_label: str, out: str) -> None:
         try:
-            plt.scatter(x, y, color='blue')
-            plt.plot(x, model.coef_ * x + model.intercept_, '-r')
+            plt.figure(figsize=(10, 6))
+            plt.scatter(x, y, color='blue', alpha=0.6, label='Datos reales')
+            
+            # Crear la línea de regresión
+            x_reshaped = x.reshape(-1, 1)
+            y_pred = model.predict(x_reshaped)
+            plt.plot(x, y_pred, '-r', linewidth=2, label='Línea de regresión')
+            
             plt.xlabel(x_label)
             plt.ylabel(y_label)
+            plt.legend()
+            plt.grid(True, alpha=0.3)
+            plt.tight_layout()
             plt.savefig(out)
+            plt.close()
             print(f"Se creó gráfico de regresión lineal en {out}")
         except Exception as e:
             print(f"Error: no se pudo crear gráfico del modelo: {e}")
-    
-    

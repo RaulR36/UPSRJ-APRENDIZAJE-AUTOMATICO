@@ -167,14 +167,14 @@ class TestEvaluationOne(unittest.TestCase):
         self.assertEqual(status, os.EX_OK, "main() no terminó con EX_OK")
 
         # Verificar que intro.csv_registers funciona
-        total, df = ipd.csv_registers(main.FILE)
+        total, df = ipd.csv_registers(main.CSV_FILE)
         self.assertIsNotNone(total, "csv_registers devolvió total = None")
         self.assertIsInstance(df, pd.DataFrame, "csv_registers no devolvió un DataFrame válido")
         self.assertFalse(df.empty, "csv_registers devolvió un DataFrame vacío")
 
         # Verificar existencia de archivos de salida
-        output_csv = os.path.join(os.path.dirname(main.FILE), "..", "outputs", "aprobados.csv")
-        output_plot = os.path.join(os.path.dirname(main.FILE), "..", "analisis.png")
+        output_csv = os.path.join(os.path.dirname(main.CSV_FILE), "..", "outputs", "aprobados.csv")
+        output_plot = os.path.join(os.path.dirname(main.CSV_FILE), "..", "outputs", "analisis.png")
         self.assertTrue(os.path.exists(output_csv), "No se encontró 'aprobados.csv'")
         self.assertTrue(os.path.exists(output_plot), "No se encontró 'analisis.png'")
 

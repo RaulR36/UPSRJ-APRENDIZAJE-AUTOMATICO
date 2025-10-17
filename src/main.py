@@ -37,14 +37,14 @@ def introduction():
         print(f"- Estudiantes cargados: {total}")
 
         # Filtrar estudiantes con calificación > 8
-        aprobados = intro.get_above(df, col="calificacion", n=8)
+        aprobados = intro.get_above(df, col="promedio", n=8)
         if aprobados is None or aprobados.empty:
             print("Error: No se pudo filtrar estudiantes aprobados.\n")
             return os.EX_SOFTWARE
         print(f"- Estudiantes aprobados:\n{aprobados}")
 
         # Agrupar por carrera y calcular promedio
-        promedio_por_carrera = intro.group_and_average(aprobados, group="carrera", avg="calificacion")
+        promedio_por_carrera = intro.group_and_average(aprobados, group="carrera", avg="promedio")
         if promedio_por_carrera is None or promedio_por_carrera.empty:
             print("Error: No se pudo calcular el promedio por carrera.\n")
             return os.EX_SOFTWARE
@@ -53,6 +53,8 @@ def introduction():
         # Exportar resultados
         OUTPUT = os.path.join(os.path.dirname(__file__), "outputs", "aprobados.csv")
         try:
+            if not os.path.exists(os.path.dirname(OUTPUT)):
+                os.mkdir(os.path.dirname(OUTPUT))
             intro.export_data(aprobados, OUTPUT)
             print(f"- Datos exportados a: {OUTPUT}")
         except:
@@ -103,7 +105,7 @@ def introduction():
             plt.legend()
             plt.grid(True)
             plt.tight_layout()
-            plt.savefig("analisis.png", dpi=300)
+            plt.savefig(os.path.join(os.path.dirname(OUTPUT), "analisis.png"), dpi=300)
             plt.show()
             print("Gráfica guardada como 'analisis.png'\n")
         except:
